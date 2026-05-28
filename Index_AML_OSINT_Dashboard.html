@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AML OSINT Dashboard — Canara Bank TM Unit</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.x/dist/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#ffffff;
+  --s1:#f8fafc;
+  --s2:#f1f5f9;
+  --s3:#e2e8f0;
+  --bd:#cbd5e1;
+  --bdB:#94a3b8;
+  --amber:#b45309;
+  --amberD:#78350f;
+  --text:#374151;
+  --dim:#6b7280;
+  --bright:#111827;
+  --danger:#dc2626;
+  --safe:#16a34a;
+  --info:#1d4ed8;
+  --navy:#1e3a5f;
+  --mono:'Courier New',monospace;
+  --sans:-apple-system,'Segoe UI',sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--mono);font-size:13px;line-height:1.6}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1440px;margin:0 auto;padding:0 16px}
+
+/* HEADER — dark navy keeps structure visible */
+.hdr{background:#1e3a5f;border-bottom:3px solid #2d5a8e;padding:12px 0;position:sticky;top:0;z-index:200}
+.hdr-in{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.hdr-t{font-size:20px;font-weight:900;color:#f0c040;letter-spacing:2px}
+.hdr-s{font-size:9px;color:#7aa0c8;letter-spacing:3px;margin-bottom:2px;text-transform:uppercase;font-weight:bold}
+.hdr-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.stat-box{text-align:center;padding:5px 12px;background:rgba(255,255,255,0.12);border:1px solid rgba(255,255,255,0.2);border-radius:4px}
+.stat-n{font-size:20px;font-weight:900}
+.stat-l{font-size:8px;color:#90b4d0;letter-spacing:2px;font-weight:bold}
+
+/* QUICK NAV */
+.qnav{padding:8px 0;border-bottom:2px solid var(--bd);overflow-x:auto;white-space:nowrap;background:var(--s1)}
+.ft-pill{display:inline-block;padding:4px 10px;border:2px solid;font-size:9px;font-weight:900;letter-spacing:1px;cursor:pointer;margin-right:5px;text-decoration:none;border-radius:3px;background:#fff}
+.ft-pill:hover{opacity:0.75}
+
+/* SECTION HEADERS */
+.sh{font-size:10px;color:var(--navy);letter-spacing:2px;text-transform:uppercase;font-weight:900;padding:1.5rem 0 0.6rem;border-bottom:3px solid var(--navy);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sh i{font-size:14px}
+
+/* GRIDS */
+.g3{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:12px}
+.g4{display:grid;grid-template-columns:repeat(auto-fill,minmax(185px,1fr));gap:10px}
+.g2{display:grid;grid-template-columns:repeat(auto-fill,minmax(380px,1fr));gap:12px}
+
+/* FT CARDS */
+.ftc{background:#fff;border:1px solid var(--bd);border-radius:5px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+.ftc-hdr{padding:9px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:8px;background:var(--s1);border-left:5px solid var(--ftc)}
+.ftc-num{font-size:9px;color:var(--dim);letter-spacing:1px;font-weight:900}
+.ftc-name{font-size:12px;font-weight:900;color:var(--bright)}
+.ftc-body{padding:10px 14px;background:#fff}
+.ftl{font-size:8px;color:var(--navy);letter-spacing:2px;margin:9px 0 5px;text-transform:uppercase;font-weight:900;border-bottom:1px solid var(--bd);padding-bottom:3px}
+.ftl:first-child{margin-top:0}
+.lr{display:flex;gap:4px;margin-bottom:5px;align-items:flex-start;flex-wrap:wrap}
+.ll{font-size:10px;color:var(--text);font-weight:bold;flex:1;min-width:140px;padding-top:3px}
+.note{font-size:10px;color:var(--dim);border-top:2px solid var(--bd);padding:8px 14px;margin:8px -14px -10px;background:var(--s1);line-height:1.6;font-weight:bold}
+
+/* BUTTONS */
+.bn{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;font-size:9px;font-weight:900;border:1.5px solid;background:transparent;cursor:pointer;text-decoration:none;font-family:var(--mono);white-space:nowrap;letter-spacing:.5px;border-radius:3px}
+.bn i{font-size:10px}
+.bn-g{color:#166534;border-color:#4ade80;background:#f0fdf4}.bn-g:hover{background:#dcfce7}
+.bn-t{color:#1e40af;border-color:#60a5fa;background:#eff6ff}.bn-t:hover{background:#dbeafe}
+.bn-a{color:#92400e;border-color:#fbbf24;background:#fffbeb}.bn-a:hover{background:#fef3c7}
+.bn-r{color:#991b1b;border-color:#f87171;background:#fef2f2}.bn-r:hover{background:#fee2e2}
+.bn-f{color:#9a3412;border-color:#fb923c;background:#fff7ed}.bn-f:hover{background:#ffedd5}
+.bn-c{background:var(--s2);border:1.5px solid var(--bd);color:var(--dim);padding:3px 9px;font-size:9px;font-weight:900;cursor:pointer;font-family:var(--mono);border-radius:3px}
+.bn-c:hover{color:var(--bright);border-color:var(--navy)}
+.bn-act{padding:9px 18px;font-size:11px;font-weight:900;letter-spacing:1.5px;border:2px solid;background:transparent;cursor:pointer;font-family:var(--mono);border-radius:4px}
+
+/* PORTAL LINKS */
+.plink{display:flex;align-items:center;gap:10px;padding:10px 14px;background:#fff;border:1.5px solid var(--bd);border-radius:5px;color:var(--bright);font-size:11px;font-weight:900;box-shadow:0 1px 3px rgba(0,0,0,0.06)}
+.plink:hover{border-color:var(--navy);background:var(--s1)}
+.plink i{font-size:16px;color:var(--navy);flex-shrink:0}
+.plink-sub{font-size:9px;color:var(--dim);margin-top:2px;font-weight:bold}
+
+/* RSS */
+.rrow{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bd)}
+.rrow:last-child{border-bottom:none}
+.rname{font-size:11px;color:var(--bright);font-weight:900;flex:1}
+.rsub{font-size:9px;color:var(--dim);margin-top:2px;font-weight:bold}
+.rss-btns{display:flex;gap:5px}
+
+/* QUERY ROWS */
+.qrow{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--bd)}
+.qrow:last-child{border-bottom:none}
+.qtxt{font-size:11px;color:var(--bright);font-weight:900;flex:1;font-family:var(--mono)}
+
+/* TWITTER */
+.tw-row{display:flex;flex-wrap:wrap;gap:8px}
+.tw-h{font-size:11px;font-weight:900;padding:5px 11px;background:#eff6ff;border:1.5px solid #60a5fa;border-radius:4px;color:#1e40af}
+.tw-h:hover{background:#dbeafe}
+.tier{font-size:9px;color:var(--navy);letter-spacing:2px;margin:14px 0 7px;text-transform:uppercase;font-weight:900}
+
+/* CARDS */
+.card{background:#fff;border:1.5px solid var(--bd);border-radius:5px;padding:14px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.card h4{font-size:12px;font-weight:900;color:var(--bright);margin-bottom:8px}
+.card p{font-size:11px;color:var(--text);line-height:1.7;margin-bottom:6px;font-weight:bold}
+.card p:last-child{margin-bottom:0}
+.card strong{color:var(--bright);font-weight:900}
+.card a{color:var(--info);font-weight:900}
+
+/* TELEGRAM */
+.tg-card{background:#fff;border:1.5px solid var(--bd);border-left:4px solid #2563eb;border-radius:5px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+.tg-name{font-size:12px;font-weight:900;color:var(--bright);margin-bottom:5px}
+.tg-desc{font-size:11px;color:var(--text);font-weight:bold;line-height:1.6;margin-bottom:8px}
+.tg-how{font-size:10px;color:var(--navy);font-weight:900;font-style:italic}
+
+/* INTEL LOG */
+.lform{background:var(--s1);border:1.5px solid var(--bd);border-radius:5px;padding:14px;margin-bottom:12px}
+.srow{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.sbtn{padding:5px 11px;font-size:10px;font-weight:900;border:1.5px solid var(--bd);background:#fff;color:var(--dim);cursor:pointer;font-family:var(--mono);border-radius:3px}
+.sbtn.on{background:#fffbeb;border-color:#fbbf24;color:#92400e}
+.lentry{background:#fff;border:1.5px solid var(--bd);border-left:4px solid var(--amber);border-radius:5px;padding:11px 14px;margin-bottom:9px;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+.lmeta{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.ltags{display:flex;gap:5px;flex-wrap:wrap}
+.tag{font-size:9px;font-weight:900;padding:2px 8px;border:1.5px solid var(--bd);background:var(--s2);color:var(--dim);border-radius:3px}
+.delbtn{background:none;border:none;color:var(--dim);cursor:pointer;font-size:13px;padding:0 2px}
+.delbtn:hover{color:var(--danger)}
+.ltxt{font-size:12px;font-weight:bold;color:var(--bright);line-height:1.6}
+
+/* FORM ELEMENTS */
+select,textarea,input{background:#fff;border:1.5px solid var(--bd);color:var(--bright);font-weight:bold;padding:9px 12px;font-size:12px;font-family:var(--mono);width:100%;outline:none;border-radius:4px}
+select:focus,textarea:focus{border-color:var(--navy);border-width:2px}
+
+/* STATE GRID */
+.state-card{background:#fff;border:1.5px solid var(--bd);border-radius:5px;padding:11px 14px;box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+.state-name{font-size:11px;font-weight:900;color:var(--bright);margin-bottom:5px}
+.state-sub{font-size:10px;color:var(--dim);font-weight:bold;margin-bottom:8px}
+
+.footer{border-top:3px solid var(--bd);padding:1.5rem 0;margin-top:2rem;font-size:10px;color:var(--dim);font-weight:bold;line-height:2}
+
+.live{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--safe);animation:pulse 2s infinite;margin-right:5px;vertical-align:middle}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+@media(max-width:640px){
+  .hdr-in{flex-direction:column;align-items:flex-start}
+  .g3,.g4,.g2{grid-template-columns:1fr}
+  .qnav{font-size:9px}
+  .hdr-t{font-size:16px}
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="hdr">
+<div class="wrap">
+<div class="hdr-in">
+  <div>
+    <div class="hdr-s">Canara Bank · S&R Wing · AML Unit · Phase 2</div>
+    <div class="hdr-t">AML OSINT Dashboard</div>
+    <div style="font-size:9px;color:var(--dim)" id="clock"></div>
+  </div>
+  <div class="hdr-r">
+    <div class="stat-box"><div class="stat-n" id="log-count" style="color:var(--amber)">0</div><div class="stat-l">Intel log</div></div>
+    <button class="bn-act" style="color:var(--amber);border-color:var(--amberD)" onclick="exportBrief()"><i class="ti ti-copy"></i> EXPORT → CASE TOOL</button>
+  </div>
+</div>
+</div>
+</div>
+
+<div class="wrap">
+
+<!-- QUICK NAV -->
+<div class="qnav" id="qnav"></div>
+
+<!-- GETTING STARTED -->
+<div class="sh"><i class="ti ti-rocket"></i> Getting started — read once, then this section stays as a reference</div>
+<div class="g3" style="margin-bottom:12px">
+  <div class="card" style="border-left:2px solid var(--safe)">
+    <h4 style="color:var(--safe)">Step 1 — Host this file (2 minutes)</h4>
+    <p style="margin-bottom:8px">This HTML file becomes your permanent dashboard URL accessible on any device.</p>
+    <p style="margin-bottom:4px"><strong style="color:var(--bright)">Netlify Drop (recommended — no account needed):</strong></p>
+    <p style="margin-bottom:6px">1. Open <a href="https://app.netlify.com/drop" target="_blank" style="color:var(--info)">app.netlify.com/drop</a> on your computer<br>
+    2. Drag and drop the AML_OSINT_Dashboard.html file onto the page<br>
+    3. You get a URL immediately (e.g. clever-name-123.netlify.app)<br>
+    4. Open that URL on your phone — bookmark it. Done.</p>
+    <p style="margin-bottom:4px"><strong style="color:var(--bright)">GitHub Pages (permanent + customisable):</strong></p>
+    <p>1. github.com → Sign up (free) → New repository → name: aml-dashboard → Public<br>
+    2. Upload this file, rename it to index.html<br>
+    3. Settings → Pages → Branch: main → Save<br>
+    4. URL: username.github.io/aml-dashboard (live in 2 minutes)</p>
+  </div>
+  <div class="card" style="border-left:2px solid var(--amber)">
+    <h4 style="color:var(--amber)">Step 2 — Google Alerts (15 minutes, one-time)</h4>
+    <p style="margin-bottom:6px">Open <a href="https://www.google.com/alerts" target="_blank" style="color:var(--info)">google.com/alerts</a> in your browser using your personal Gmail. For each of the 22 queries in Section 6 below: click Copy → paste into the Alerts search box → click Show Options → set <em>How often: At most once a day</em> · <em>Language: English</em> · <em>Region: India</em> · <em>How many: Best results</em> → Create Alert.</p>
+    <p style="margin-bottom:6px">All alerts arrive as one daily email digest. In Gmail: create a folder called <strong style="color:var(--bright)">AML Intel</strong> and set a filter to move all Google Alerts emails there automatically.</p>
+    <p>Check this folder each morning before opening your case batch. It takes 3 minutes to scan.</p>
+  </div>
+  <div class="card" style="border-left:2px solid #cc8830">
+    <h4 style="color:#cc8830">Step 3 — Feedly RSS (10 minutes, one-time)</h4>
+    <p style="margin-bottom:6px">Create a free account at <a href="https://feedly.com" target="_blank" style="color:var(--info)">feedly.com</a>. Once logged in, return to this dashboard and click any <strong style="color:#cc8830">Feedly +</strong> button in Section 5. It opens Feedly and adds that feed to your collection in one click. Do this for all 12 feeds.</p>
+    <p style="margin-bottom:6px">Create a Feedly collection called <strong style="color:var(--bright)">AML Intel</strong> and assign all feeds to it. Feedly is available as a mobile app — same collection syncs to your phone.</p>
+    <p>Feedly shows you new articles from all 12 sources in one place, without visiting each site.</p>
+  </div>
+  <div class="card" style="border-left:2px solid #4888d8">
+    <h4 style="color:#4888d8">Step 4 — Twitter/X list (10 minutes, one-time)</h4>
+    <p style="margin-bottom:6px">Create a Twitter/X account if you don't have one. Go to Lists → Create List → name: <strong style="color:var(--bright)">AML Intel</strong> → Private.</p>
+    <p style="margin-bottom:6px">Add all handles from Section 4. Enable mobile notifications for: @CyberDost, @RBI, @DFS_India, @PIBHomeAffairs. For state police: follow but don't enable notifications (too many tweets).</p>
+    <p>The pre-built Twitter search links in Sections 1 and 4 work without an account — they open live search results in browser.</p>
+  </div>
+  <div class="card" style="border-left:2px solid #2888c8">
+    <h4 style="color:#2888c8">Step 5 — Telegram channels (10 minutes, one-time)</h4>
+    <p style="margin-bottom:6px">Open Telegram on your phone. Search for and join the channels listed in Section 7. Keep all joined channels in a Telegram folder called <strong style="color:var(--bright)">AML</strong>. Mute all notifications — you check them on your schedule, they don't alert you.</p>
+    <p>Read-only monitoring only. Never identify yourself as a bank analyst. Never share customer data or case details in any group.</p>
+  </div>
+  <div class="card" style="border-left:2px solid var(--danger)">
+    <h4 style="color:var(--bright)">Daily 10-minute routine</h4>
+    <p style="margin-bottom:4px"><strong style="color:var(--amber)">Min 1-2</strong> — Open Gmail: scan AML Intel folder (Google Alerts digest). Note any Canara mentions or active fraud type news.</p>
+    <p style="margin-bottom:4px"><strong style="color:var(--amber)">Min 3-4</strong> — Open Feedly AML collection: scan article headlines. Open and read anything with Canara, ED action, I4C advisory, or your active fraud type.</p>
+    <p style="margin-bottom:4px"><strong style="color:var(--amber)">Min 5-6</strong> — Open this dashboard: use Section 4 Twitter searches to scan live Twitter for last 12 hours. Specifically: Digital arrest India, Canara Bank fraud, ED cybercrime India.</p>
+    <p style="margin-bottom:4px"><strong style="color:var(--amber)">Min 7-8</strong> — Telegram: scan your AML folder for any overnight posts in fraud victim groups (platform names, account numbers, new methods).</p>
+    <p style="margin-bottom:4px"><strong style="color:var(--amber)">Min 9-10</strong> — Section 9 Intel Log: type or paste anything you found. Click Export → copy for Phase 3 Case Analysis Tool. Paste it at the top of your first high-priority case of the day.</p>
+    <p style="margin-top:6px;color:var(--dim);font-size:9px">This routine connects external intelligence to your case batch. An account that looks like a moderate alert becomes a confirmed STR when you know the same fraud type is spiking in that city this week.</p>
+  </div>
+</div>
+
+<!-- SECTION 1: FT SOURCE MAP -->
+<div class="sh"><i class="ti ti-map-2"></i> Section 1 — Fraud type source map · Phase 1 taxonomy → OSINT search targets</div>
+<div class="g3" id="ft-grid"></div>
+
+<!-- SECTION 2: OFFICIAL PORTALS -->
+<div class="sh"><i class="ti ti-building-government"></i> Section 2 — Official portals · national investigation & compliance resources</div>
+<div class="g4" id="portal-grid"></div>
+
+<!-- SECTION 3: STATE CYBERCRIME POLICE -->
+<div class="sh"><i class="ti ti-shield"></i> Section 3 — State cybercrime police · portals & Twitter handles</div>
+<div class="g4" id="state-grid"></div>
+
+<!-- SECTION 4: TWITTER/X DIRECTORY -->
+<div class="sh"><i class="ti ti-brand-twitter"></i> Section 4 — Twitter/X monitoring directory · organized by tier</div>
+<div id="tw-section"></div>
+
+<!-- SECTION 5: NEWS & RSS SOURCES -->
+<div class="sh"><i class="ti ti-rss"></i> Section 5 — News media & RSS sources · Feedly one-click subscribe links</div>
+<div class="card" style="margin-bottom:12px">
+  <h4>How to use Feedly subscribe links</h4>
+  <p>If you have a Feedly account (feedly.com — free), clicking any "Feedly +" button below opens Feedly and adds that specific RSS feed to your collection. If you don't have Feedly yet, the "RSS" button opens the raw feed in your browser. Set up Feedly once and all future updates come to you automatically.</p>
+</div>
+<div id="rss-list"></div>
+
+<!-- SECTION 6: GOOGLE ALERTS SETUP -->
+<div class="sh"><i class="ti ti-bell"></i> Section 6 — Google Alerts setup · 22 queries · copy and paste into google.com/alerts</div>
+<div class="card" style="margin-bottom:12px">
+  <h4>Setup instructions</h4>
+  <p>Open <a href="https://www.google.com/alerts" target="_blank" style="color:var(--info)">google.com/alerts</a> in a new tab. For each query below: click Copy, paste into the Google Alerts search box, set frequency to "At most once a day", language to English, region to India, and click Create Alert. Takes about 15 minutes for all 22. Alerts arrive as a daily email digest to your Gmail.</p>
+</div>
+<div class="card" id="alerts-list"></div>
+
+<!-- SECTION 7: TELEGRAM GUIDE -->
+<div class="sh"><i class="ti ti-brand-telegram"></i> Section 7 — Telegram channel guide · fraud intelligence communities</div>
+<div class="card" style="margin-bottom:10px;border-left:2px solid var(--danger)">
+  <h4 style="color:var(--danger)">Operational security rule</h4>
+  <p>Never identify yourself as a Canara Bank analyst in any Telegram group. Never share customer data, account numbers, or case details in these groups. Use read-only monitoring. If a group asks for your bank employer: leave immediately without responding.</p>
+</div>
+<div class="g2" id="tg-grid"></div>
+
+<!-- SECTION 8: QUICK SEARCH LAUNCH PAD -->
+<div class="sh"><i class="ti ti-search"></i> Section 8 — Quick OSINT searches · pre-built Google & Twitter queries</div>
+<div class="g3" id="search-grid"></div>
+
+<!-- SECTION 9: INTEL LOG -->
+<div class="sh"><i class="ti ti-pencil"></i> Section 9 — Manual intelligence log · WhatsApp · Telegram · personal network</div>
+<div class="lform">
+  <div class="srow" id="src-row"></div>
+  <select id="ft-sel" style="margin-bottom:10px"></select>
+  <textarea id="log-in" rows="3" placeholder="Type or paste intelligence here — fraud type, city/state, amounts, platform names, phone numbers, account numbers if known, method used. Be specific. This persists in your browser and is included in the Export output."></textarea>
+  <button class="bn-act" style="color:var(--amber);border-color:var(--amberD);margin-top:8px" onclick="addEntry()">LOG INTELLIGENCE →</button>
+</div>
+<div id="log-list"></div>
+
+<div class="footer">
+  AML OSINT Dashboard · Canara Bank S&R Wing · Phase 2 of the AML Intelligence System<br>
+  All links open public OSINT sources · No Claude API · No external AI services · All data is public<br>
+  Intelligence log saved in browser local storage · Export button copies formatted brief for Phase 3 Case Analysis Tool<br>
+  For a permanent mobile URL: host this file on GitHub Pages (free) — upload as index.html, enable Pages in repo settings
+</div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────────────────
+const GS = q => `https://news.google.com/search?q=${encodeURIComponent(q)}&hl=en-IN&gl=IN&ceid=IN:en`;
+const TX = q => `https://twitter.com/search?q=${encodeURIComponent(q)}&f=live`;
+const FL = u => `https://feedly.com/i/subscription/feed/${encodeURIComponent(u)}`;
+const GA = q => `https://www.google.com/alerts#?q=${encodeURIComponent(q)}`;
+
+const FT_DATA = [
+  { id:"ft01", num:"FT-01", name:"Mule Account Operations", color:"#E24B4A",
+    searches:[
+      ["Mule accounts bank India arrested 2025","mule accounts bank India arrested 2025"],
+      ["Money mule India bank fraud 2025","money mule bank fraud India 2025"],
+      ["MuleHunter RBI bank accounts India","MuleHunter RBI mule bank account India"],
+    ],
+    tw:[["Mule accounts India","mule accounts bank India"],["Money mule bank India","money mule bank India 2025"]],
+    portals:["1930 CFCFRMS","I4C Suspect Registry","Cybercrime Portal"],
+    note:"Check in CBS: same Aadhaar/mobile linked to multiple accounts · IP mismatch in net banking logs · immediate 85-95% balance depletion after credits · credits from multiple unrelated retail senders"
+  },
+  { id:"ft02", num:"FT-02", name:"Investment Scam / Pig Butchering", color:"#7F77DD",
+    searches:[
+      ["Investment scam India arrested 2025","investment scam India arrested 2025"],
+      ["Pig butchering India 2025","pig butchering scam India 2025"],
+      ["Fake trading app India arrested","fake trading app India arrested 2025"],
+      ["WhatsApp stock tip fraud India","WhatsApp stock trading scam India arrested"],
+    ],
+    tw:[["Investment scam India","investment scam India 2025"],["Pig butchering India","pig butchering India fraud"]],
+    portals:["SEBI Registration","RBI NBFC List","1930 CFCFRMS","I4C Portal"],
+    note:"Verify receiving entity: SEBI/RBI not registered · MCA: company under 12 months old, small paid-up capital · multiple retail senders from different states · immediate outward transfer after receipt"
+  },
+  { id:"ft03", num:"FT-03", name:"Digital Arrest Fraud", color:"#D85A30",
+    searches:[
+      ["Digital arrest fraud India arrested 2025","digital arrest fraud India arrested 2025"],
+      ["CBI impersonation fraud India arrested","CBI NCB impersonation fraud India arrested"],
+      ["ED officer impersonation India scam","ED officer impersonation India scam arrested"],
+      ["Digital arrest victim India 2025","digital arrest India victim money transferred"],
+    ],
+    tw:[["Digital arrest India","digital arrest India fraud"],["CBI impersonation India","CBI ED impersonation India fraud"]],
+    portals:["1930 CFCFRMS","Cybercrime Portal","PIB Home Affairs","I4C Portal"],
+    note:"Victim profile: elderly (55-75), retired, salaried professional · CBS red flags: sudden large RTGS, premature FD closure same day, new beneficiary added and used within 60 minutes · remarks: 'customs fee', 'RBI safe custody', 'Supreme Court'"
+  },
+  { id:"ft04", num:"FT-04", name:"Illegal Payment Gateways", color:"#BA7517",
+    searches:[
+      ["Illegal payment gateway India arrested 2025","illegal payment gateway India arrested 2025"],
+      ["Online gambling money laundering India","online gambling money laundering India arrested"],
+      ["Offshore betting payment India arrested","offshore betting payment gateway India 2025"],
+    ],
+    tw:[["Illegal payment gateway India","illegal payment gateway India"],["Online gambling money India","online gambling India money laundering"]],
+    portals:["RBI DPSS","1930 CFCFRMS","I4C Portal","State Police"],
+    note:"Account pattern: 50-500 small credits per day · credits cluster during match hours (7-11 PM for cricket, weekends for gaming) · daily net-zero outward aggregation · RBI Payment Aggregator list: entity not authorized"
+  },
+  { id:"ft05", num:"FT-05", name:"OTP / Account Takeover (ATO)", color:"#378ADD",
+    searches:[
+      ["OTP fraud India bank arrested 2025","OTP fraud bank India arrested 2025"],
+      ["SIM swap fraud India 2025","SIM swap fraud India bank account 2025"],
+      ["Account takeover bank India","account takeover bank fraud India arrested"],
+    ],
+    tw:[["OTP fraud India","OTP fraud bank India 2025"],["SIM swap India","SIM swap fraud India bank"]],
+    portals:["1930 CFCFRMS","Cybercrime Portal","TRAI/DOT"],
+    note:"CBS/net banking: new device fingerprint in session · IP from different state/country · new beneficiary added and used same session within minutes · if SIM swap suspected: call telecom operator to verify porting"
+  },
+  { id:"ft06", num:"FT-06", name:"Work-From-Home / Task Scam", color:"#1D9E75",
+    searches:[
+      ["Task scam India arrested 2025","task scam India arrested 2025"],
+      ["Work from home fraud India 2025","work from home scam India arrested 2025"],
+      ["YouTube like task fraud India","YouTube video rating task fraud India arrested"],
+      ["Telegram task scam India","Telegram task fraud India arrested 2025"],
+    ],
+    tw:[["Task scam India","task scam India fraud"],["Work from home India scam","work from home fraud India Telegram"]],
+    portals:["1930 CFCFRMS","Cybercrime Portal","I4C Portal"],
+    note:"Victim pattern: young (18-35), multiple small inward credits (Rs.100-2000) from strangers followed by escalating outward deposits · outward remarks: 'task deposit', 'VIP membership', 'upgrade fee' · step-up pattern each transfer"
+  },
+  { id:"ft07", num:"FT-07", name:"Loan App / KYC Fraud", color:"#2060A0",
+    searches:[
+      ["Loan app fraud India arrested 2025","loan app fraud India arrested 2025"],
+      ["KYC fraud bank account India","KYC fraud bank account opened India 2025"],
+      ["Digital lending fraud India RBI","digital lending unregistered app India arrested"],
+      ["Loan app harassment India arrested","loan app harassment extortion India arrested"],
+    ],
+    tw:[["Loan app fraud India","loan app fraud India 2025"],["KYC fraud India bank","KYC fraud India bank account"]],
+    portals:["RBI NBFC List","1930 CFCFRMS","Cybercrime Portal"],
+    note:"Contact customer first: ask if they opened the account and know about transactions · RBI NBFC list: verify app/lender registration · Aadhaar multiplicity: same Aadhaar across 5+ accounts is the fraud factory signal · UIDAI Aadhaar lock: assist victim"
+  },
+  { id:"ft08", num:"FT-08", name:"Shell Company Layering", color:"#888780",
+    searches:[
+      ["Shell company money laundering India ED 2025","shell company money laundering India ED 2025"],
+      ["ED shell company India raid arrest","Enforcement Directorate shell company raid India"],
+      ["Benami transaction India ED arrested","benami transaction India ED arrested 2025"],
+      ["Circular transaction money laundering India","circular transaction shell company money laundering India"],
+    ],
+    tw:[["Shell company India ED","shell company money laundering India"],["Benami transaction India","benami ED India arrested"]],
+    portals:["MCA Company Search","GST Portal","ED Press Releases","ROC"],
+    note:"MCA check: paid-up capital vs transaction volume ratio · director multiplicity: same person in 5-20 recently incorporated companies · no GST registration for a company handling crores · circular transactions among related companies"
+  },
+  { id:"ft09", num:"FT-09", name:"Courier / Parcel Fraud", color:"#606060",
+    searches:[
+      ["Courier fraud India arrested 2025","courier fraud India parcel scam arrested 2025"],
+      ["Parcel fraud India CBI NCB","parcel fraud India CBI NCB impersonation arrested"],
+      ["FedEx scam India arrested","FedEx DHL scam India arrested 2025"],
+      ["Customs officer impersonation India","customs officer impersonation India fraud arrested"],
+    ],
+    tw:[["Courier fraud India","courier fraud India parcel 2025"],["Parcel scam India","parcel scam India customs fake"]],
+    portals:["1930 CFCFRMS","Cybercrime Portal","PIB Home Affairs"],
+    note:"Same signature as Digital Arrest (FT-03) but pretext is courier/parcel · key differentiator: remarks contain 'customs fee', 'DTDC', 'parcel clearance' · geographic clustering: gangs target one city for 2-4 weeks then move · proactively scan Canara customers in affected city"
+  },
+  { id:"ft10", num:"FT-10", name:"Romance Scam / Financial Grooming", color:"#C0505A",
+    searches:[
+      ["Romance scam India arrested 2025","romance scam India arrested 2025"],
+      ["Matrimonial fraud India arrested","matrimonial fraud money India arrested 2025"],
+      ["NRI investment romance scam India","NRI romance fraud investment India 2025"],
+      ["Social media romance fraud India","Facebook Instagram romance fraud India arrested"],
+    ],
+    tw:[["Romance scam India","romance scam India 2025"],["Matrimonial fraud India","matrimonial fraud India arrested"]],
+    portals:["1930 CFCFRMS","Cybercrime Portal"],
+    note:"Pattern: recurring moderate transfers to same beneficiary over months · victim is 40-65, recently widowed/divorced · FEMA: international remittances without clear relationship need documentation · reverse image search on profile photos before alerting victim"
+  },
+  { id:"ft11", num:"FT-11", name:"Crypto-Linked Money Laundering", color:"#00A0A0",
+    searches:[
+      ["Cryptocurrency money laundering India arrested 2025","cryptocurrency money laundering India arrested 2025"],
+      ["P2P crypto money laundering India","P2P crypto money laundering India arrested"],
+      ["USDT India money laundering bank","USDT tether India money laundering arrested"],
+      ["Bitcoin India money laundering ED","Bitcoin money laundering India ED arrested"],
+    ],
+    tw:[["Crypto laundering India","crypto money laundering India 2025"],["USDT India laundering","USDT P2P India money laundering"]],
+    portals:["FIU-IND","ED Press Releases","1930 CFCFRMS"],
+    note:"Bank signature: payment spray — 20-100 small UPI payments to different individuals in 1-3 hour window at night · preceded by aggregation from multiple mule accounts · FIU-IND: special crypto investigation team for blockchain tracing requests"
+  },
+  { id:"ft12", num:"FT-12", name:"Hawala / FEMA Violations", color:"#507030",
+    searches:[
+      ["Hawala India arrested 2025","hawala India arrested enforcement 2025"],
+      ["FEMA violation India arrested","FEMA violation India arrested ED 2025"],
+      ["Hundi money laundering India","hundi hawala money laundering India arrested"],
+      ["Trade based money laundering India","trade based money laundering TBML India arrested"],
+    ],
+    tw:[["Hawala India","hawala India arrested 2025"],["FEMA India","FEMA violation India enforcement"]],
+    portals:["ED Press Releases","RBI FEMA","DGFT/ICEGATE","Customs/CBIC"],
+    note:"CTR trigger: multiple different individuals depositing cash to same account on same day, all below Rs.50K threshold · business volume vs cash mismatch: jewelry shop depositing Rs.50L/day has no retail explanation · TBML: compare invoice price against MCX/commodity benchmarks"
+  },
+];
+
+const PORTALS = [
+  {icon:"ti-shield-exclamation",label:"I4C Advisories",sub:"i4c.mha.gov.in/advisories",url:"https://i4c.mha.gov.in/advisories.aspx"},
+  {icon:"ti-world",label:"Cybercrime.gov.in",sub:"National reporting portal",url:"https://cybercrime.gov.in"},
+  {icon:"ti-phone",label:"1930 CFCFRMS",sub:"Inter-bank freeze mechanism",url:"https://cybercrime.gov.in/Webform/crime_form.aspx"},
+  {icon:"ti-database",label:"I4C Suspect Registry",sub:"sancharsaathi.gov.in",url:"https://sancharsaathi.gov.in/suspect_registry"},
+  {icon:"ti-building-bank",label:"RBI Press Releases",sub:"rbi.org.in",url:"https://www.rbi.org.in/Scripts/BS_PressReleaseDisplay.aspx"},
+  {icon:"ti-gavel",label:"ED Press Releases",sub:"enforcementdirectorate.gov.in",url:"https://enforcementdirectorate.gov.in/press-releases"},
+  {icon:"ti-speakerphone",label:"PIB Home Affairs",sub:"All MHA press releases",url:"https://pib.gov.in/allRel.aspx"},
+  {icon:"ti-building-community",label:"MCA Company Search",sub:"mca.gov.in",url:"https://www.mca.gov.in/mcafoportal/viewCompanyMasterData.do"},
+  {icon:"ti-receipt",label:"GST Taxpayer Search",sub:"services.gst.gov.in",url:"https://services.gst.gov.in/services/searchtp"},
+  {icon:"ti-list",label:"RBI NBFC List",sub:"Verify lender registration",url:"https://www.rbi.org.in/Scripts/BS_NBFCList.aspx"},
+  {icon:"ti-certificate",label:"SEBI Registration",sub:"Broker/advisor registry",url:"https://www.sebi.gov.in/sebiweb/home/list/5/33/0/0/Recherche"},
+  {icon:"ti-package",label:"DGFT / ICEGATE",sub:"Trade documentation",url:"https://www.icegate.gov.in"},
+  {icon:"ti-coins",label:"FIU-IND",sub:"Financial Intelligence Unit",url:"https://fiuindia.gov.in"},
+  {icon:"ti-user-search",label:"CIBIL / Credit Bureau",sub:"Entity credit check",url:"https://www.cibil.com"},
+  {icon:"ti-lock-open",label:"UIDAI Aadhaar Portal",sub:"Aadhaar lock / verification",url:"https://myaadhaar.uidai.gov.in"},
+  {icon:"ti-flag",label:"MHA Sanctions / UAPA",sub:"Designated entities list",url:"https://mha.gov.in"},
+];
+
+const STATE_POLICE = [
+  {icon:"ti-map-pin",label:"Telangana CID / Cyber",sub:"@TelanganaCOPs | Cyber Crimes",url:"https://hydcitypolice.gov.in",tw:"https://twitter.com/TelanganaCOPs"},
+  {icon:"ti-map-pin",label:"AP Cybercrime",sub:"@APPOLICE100 | AP Cyber",url:"https://www.appolice.gov.in",tw:"https://twitter.com/APPOLICE100"},
+  {icon:"ti-map-pin",label:"Karnataka / Bengaluru",sub:"@BlrCityPolice | ADGP Cyber",url:"https://ksp.karnataka.gov.in",tw:"https://twitter.com/BlrCityPolice"},
+  {icon:"ti-map-pin",label:"Maharashtra Cyber",sub:"@MahaCyber1 | Mumbai Police",url:"https://www.mahapolice.gov.in",tw:"https://twitter.com/MumbaiPolice"},
+  {icon:"ti-map-pin",label:"Delhi Cyber Cell",sub:"@DelhiPolice | Cyber Crime",url:"https://www.delhipolice.gov.in",tw:"https://twitter.com/DelhiPolice"},
+  {icon:"ti-map-pin",label:"UP STF / Cyber",sub:"@UPPolice | STF",url:"https://uppolice.gov.in",tw:"https://twitter.com/Uppolice"},
+  {icon:"ti-map-pin",label:"Gujarat Cyber Cell",sub:"@GujPolice | Cybercrime",url:"https://www.gujaratpolice.gov.in",tw:"https://twitter.com/GujaratPolice"},
+  {icon:"ti-map-pin",label:"Rajasthan Cyber",sub:"@PoliceRajasthan",url:"https://police.rajasthan.gov.in",tw:"https://twitter.com/PoliceRajasthan"},
+];
+
+const TW_TIERS = [
+  { tier:"Priority 1 — enable notifications", handles:[
+    {label:"@CyberDost (I4C official)",url:"https://twitter.com/CyberDost"},
+    {label:"@RBI",url:"https://twitter.com/RBI"},
+    {label:"@DFS_India",url:"https://twitter.com/DFS_India"},
+    {label:"@PIBHomeAffairs",url:"https://twitter.com/PIBHomeAffairs"},
+    {label:"@FIUIndia",url:"https://twitter.com/FIUIndia"},
+  ]},
+  { tier:"State cybercrime police", handles:[
+    {label:"@TelanganaCOPs",url:"https://twitter.com/TelanganaCOPs"},
+    {label:"@MumbaiPolice",url:"https://twitter.com/MumbaiPolice"},
+    {label:"@DelhiPolice",url:"https://twitter.com/DelhiPolice"},
+    {label:"@UPPolice",url:"https://twitter.com/Uppolice"},
+    {label:"@BlrCityPolice",url:"https://twitter.com/BlrCityPolice"},
+    {label:"@MahaCyber1",url:"https://twitter.com/MahaCyber1"},
+  ]},
+  { tier:"Pre-built fraud type searches — click to open live Twitter search", handles:[
+    {label:"Digital arrest India",url:"https://twitter.com/search?q=digital+arrest+India&f=live"},
+    {label:"Investment scam India",url:"https://twitter.com/search?q=investment+scam+India+arrested&f=live"},
+    {label:"Canara Bank fraud",url:"https://twitter.com/search?q=%22Canara+Bank%22+fraud&f=live"},
+    {label:"Mule accounts India",url:"https://twitter.com/search?q=mule+accounts+bank+India&f=live"},
+    {label:"ED cybercrime India",url:"https://twitter.com/search?q=enforcement+directorate+cybercrime&f=live"},
+    {label:"Loan app fraud India",url:"https://twitter.com/search?q=loan+app+fraud+India&f=live"},
+    {label:"Crypto laundering India",url:"https://twitter.com/search?q=crypto+money+laundering+India&f=live"},
+    {label:"Hawala India arrested",url:"https://twitter.com/search?q=hawala+India+arrested&f=live"},
+  ]},
+];
+
+const RSS_FEEDS = [
+  { name:"PIB Ministry of Home Affairs", sub:"Official I4C and MHA press releases — highest signal source",
+    rss:"https://pib.gov.in/RSSNewsFeed.aspx?ModID=6&Lang=1",
+    web:"https://pib.gov.in/allRel.aspx" },
+  { name:"RBI Press Releases", sub:"Payment system alerts, customer protection, regulatory actions",
+    rss:"https://www.rbi.org.in/Scripts/rss.aspx",
+    web:"https://www.rbi.org.in/Scripts/BS_PressReleaseDisplay.aspx" },
+  { name:"Economic Times — Finance", sub:"Best coverage of financial crime with banking perspective",
+    rss:"https://economictimes.indiatimes.com/markets/rssfeeds/1977021501.cms",
+    web:"https://economictimes.indiatimes.com/markets" },
+  { name:"Times of India — India News", sub:"High volume — scan headlines; read when relevant",
+    rss:"https://timesofindia.indiatimes.com/rssfeeds/-2128936835.cms",
+    web:"https://timesofindia.indiatimes.com/india" },
+  { name:"The Hindu — National", sub:"High-quality reporting on major fraud cases and ED actions",
+    rss:"https://www.thehindu.com/news/national/feeder/default.rss",
+    web:"https://www.thehindu.com/news/national" },
+  { name:"Deccan Herald / Deccan Chronicle", sub:"Critical for AP/Telangana coverage — Canara's core geography",
+    rss:"https://www.deccanherald.com/feeds/national",
+    web:"https://www.deccanherald.com" },
+  { name:"Hindustan Times — India", sub:"UP/Delhi cybercrime coverage — STF operations and North India",
+    rss:"https://www.hindustantimes.com/feeds/rss/india-news/rssfeed.xml",
+    web:"https://www.hindustantimes.com/india-news" },
+  { name:"NDTV India News", sub:"Broadcast news cybercrime beat — national coverage",
+    rss:"https://feeds.feedburner.com/ndtvnews-india-news",
+    web:"https://www.ndtv.com/india-news" },
+  { name:"Indian Express — India", sub:"Investigations and in-depth cybercrime reporting",
+    rss:"https://indianexpress.com/section/india/feed/",
+    web:"https://indianexpress.com/section/india" },
+  { name:"LiveMint — Finance", sub:"Banking sector fraud and financial crime analysis",
+    rss:"https://www.livemint.com/rss/money",
+    web:"https://www.livemint.com/money" },
+  { name:"Moneycontrol — Personal Finance", sub:"Banking fraud, loan app issues, investment scam warnings",
+    rss:"https://www.moneycontrol.com/rss/mfnewslisting.xml",
+    web:"https://www.moneycontrol.com" },
+  { name:"Google News — Canara Bank",sub:"All news mentioning Canara Bank — most specific feed",
+    rss:"https://news.google.com/rss/search?q=Canara+Bank+fraud+cybercrime&hl=en-IN&gl=IN&ceid=IN:en",
+    web:"https://news.google.com/search?q=Canara+Bank+fraud" },
+];
+
+const ALERT_QUERIES = [
+  {cat:"Canara-specific",q:"Canara Bank fraud cybercrime"},
+  {cat:"Canara-specific",q:"Canara Bank money laundering"},
+  {cat:"Official — I4C/MHA",q:"I4C advisory cybercrime India"},
+  {cat:"Official — ED",q:"Enforcement Directorate cybercrime arrest India"},
+  {cat:"Official — ED",q:"ED money laundering India attachment"},
+  {cat:"Digital Arrest",q:"digital arrest fraud India arrested"},
+  {cat:"Digital Arrest",q:"CBI impersonation fraud India arrested"},
+  {cat:"Investment Scam",q:"investment scam India arrested 2025"},
+  {cat:"Investment Scam",q:"pig butchering scam India"},
+  {cat:"Investment Scam",q:"fake trading app India arrested"},
+  {cat:"Mule Accounts",q:"mule accounts bank India arrested"},
+  {cat:"Payment Gateways",q:"illegal payment gateway India arrested"},
+  {cat:"Payment Gateways",q:"online gambling money laundering India"},
+  {cat:"Courier Fraud",q:"courier parcel fraud India arrested"},
+  {cat:"Courier Fraud",q:"FedEx DHL fraud India arrested"},
+  {cat:"Loan / KYC",q:"loan app fraud India arrested"},
+  {cat:"Loan / KYC",q:"KYC fraud bank account India"},
+  {cat:"Crypto",q:"crypto money laundering India arrested"},
+  {cat:"Hawala",q:"hawala arrest India 2025"},
+  {cat:"Shell Companies",q:"shell company money laundering India ED"},
+  {cat:"General",q:"cybercrime India today bank fraud"},
+  {cat:"1930 System",q:"CFCFRMS 1930 cybercrime helpline India"},
+];
+
+const TG_CHANNELS = [
+  { name:"Cyber Dost (I4C Official)", desc:"I4C's official Telegram channel. Same advisories as @CyberDost Twitter. Searchable — use it to search for specific fraud platform names or phone numbers that appear in your cases.", how:'Search "Cyber Dost" on Telegram' },
+  { name:"State Cyber Police Channels", desc:"Most state cyber police have official Telegram channels. Active ones: Telangana (Cyberabad Police), AP Cyber, Maharashtra Cyber, UP STF. Post arrest details, new modus operandi, and helpline numbers.", how:'Search "[State name] Cyber Police" on Telegram' },
+  { name:"Investment Fraud Victim Communities", desc:"Where fraud victims share: fake platform names, payment account numbers given to them, phone numbers used by criminals, WhatsApp group names used for recruitment. Earliest warning for new investment scam operations.", how:'Search "investment fraud victims India" or "pig butchering victims India"' },
+  { name:"Loan App Victim Groups", desc:"Victims report specific app names, company names, harassment phone numbers, and extortion methods. App names here can be verified against RBI NBFC list and MCA portal.", how:'Search "loan app victims India" or "loan app harassment India"' },
+  { name:"Banking Fraud Awareness Groups", desc:"Community-run channels compiling fraud intelligence from multiple sources. Quality varies — only follow channels with consistent, factual content. Use for platform names and phone numbers only.", how:'Search "bank fraud awareness India" — join only well-moderated channels' },
+];
+
+const SEARCHES = [
+  {label:"Digital arrest — Google",url:GS("digital arrest fraud India arrested 2025")},
+  {label:"Digital arrest — Twitter",url:TX("digital arrest India fraud 2025")},
+  {label:"Investment scam — Google",url:GS("investment scam pig butchering India arrested 2025")},
+  {label:"Investment scam — Twitter",url:TX("investment scam India 2025")},
+  {label:"Canara Bank fraud — Google",url:GS('"Canara Bank" fraud cybercrime 2025')},
+  {label:"Canara Bank — Twitter",url:TX('"Canara Bank" fraud')},
+  {label:"I4C / MHA advisory — Google",url:GS("I4C MHA cybercrime advisory India")},
+  {label:"I4C advisory — Twitter",url:TX("I4C cybercrime advisory India")},
+  {label:"ED cybercrime action — Google",url:GS("Enforcement Directorate cybercrime arrest India 2025")},
+  {label:"ED arrest — Twitter",url:TX("enforcement directorate cybercrime India")},
+  {label:"Mule accounts — Google",url:GS("mule accounts bank India arrested 2025")},
+  {label:"Mule accounts — Twitter",url:TX("mule accounts bank India")},
+  {label:"Loan app fraud — Google",url:GS("loan app fraud India arrested 2025")},
+  {label:"Loan app — Twitter",url:TX("loan app fraud India 2025")},
+  {label:"Crypto laundering — Google",url:GS("cryptocurrency money laundering India arrested 2025")},
+  {label:"Crypto — Twitter",url:TX("crypto money laundering India")},
+  {label:"Hawala India — Google",url:GS("hawala India arrested 2025")},
+  {label:"Shell company ED — Google",url:GS("shell company money laundering India ED 2025")},
+];
+
+// ── RENDER ────────────────────────────────────────────────────────────────────
+function esc(s){return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+
+function buildQNav(){
+  const n=document.getElementById('qnav');
+  FT_DATA.forEach(f=>{
+    const a=document.createElement('a');
+    a.className='ft-pill';
+    a.href='#'+f.id;
+    a.textContent=f.num;
+    a.style.color=f.color;
+    a.style.borderColor=f.color+'66';
+    n.appendChild(a);
+  });
+}
+
+function buildFTGrid(){
+  const g=document.getElementById('ft-grid');
+  FT_DATA.forEach(f=>{
+    const d=document.createElement('div');
+    d.className='ftc';
+    d.id=f.id;
+    d.style.setProperty('--ftc',f.color);
+    const searchRows=f.searches.map(([label,q])=>`
+      <div class="lr">
+        <span class="ll">${esc(label)}</span>
+        <a class="bn bn-g" href="${GS(q)}" target="_blank" rel="noopener"><i class="ti ti-brand-google"></i>News</a>
+        <a class="bn bn-t" href="${TX(q.split(' ').slice(0,5).join(' '))}" target="_blank" rel="noopener"><i class="ti ti-brand-twitter"></i>Twitter</a>
+      </div>`).join('');
+    const twRows=f.tw.map(([label,q])=>`
+      <div class="lr">
+        <span class="ll">${esc(label)}</span>
+        <a class="bn bn-t" href="${TX(q)}" target="_blank" rel="noopener"><i class="ti ti-brand-twitter"></i>Search</a>
+      </div>`).join('');
+    const portals=f.portals.map(p=>`<span style="font-size:9px;color:var(--dim);background:var(--s2);border:1px solid var(--bd);padding:1px 6px;margin-right:4px">${esc(p)}</span>`).join('');
+    d.innerHTML=`
+      <div class="ftc-hdr">
+        <span class="ftc-num">${esc(f.num)}</span>
+        <span class="ftc-name">${esc(f.name)}</span>
+      </div>
+      <div class="ftc-body">
+        <div class="ftl">Google News + Twitter searches</div>
+        ${searchRows}
+        <div class="ftl" style="margin-top:8px">Twitter-specific</div>
+        ${twRows}
+        <div class="ftl" style="margin-top:8px">Relevant portals</div>
+        <div style="margin-bottom:4px">${portals}</div>
+        <div class="note">${esc(f.note)}</div>
+      </div>`;
+    g.appendChild(d);
+  });
+}
+
+function buildPortalGrid(){
+  const g=document.getElementById('portal-grid');
+  PORTALS.forEach(p=>{
+    const a=document.createElement('a');
+    a.className='plink';
+    a.href=p.url;a.target='_blank';a.rel='noopener';
+    a.innerHTML=`<i class="ti ${p.icon} portal-icon"></i><div><div>${esc(p.label)}</div><div class="plink-sub">${esc(p.sub)}</div></div>`;
+    g.appendChild(a);
+  });
+}
+
+function buildStateGrid(){
+  const g=document.getElementById('state-grid');
+  STATE_POLICE.forEach(s=>{
+    const d=document.createElement('div');
+    d.className='state-card';
+    d.innerHTML=`
+      <div style="font-size:11px;font-weight:bold;color:var(--bright);margin-bottom:6px">${esc(s.label)}</div>
+      <div style="font-size:10px;color:var(--dim);margin-bottom:7px">${esc(s.sub)}</div>
+      <div style="display:flex;gap:6px">
+        <a class="bn bn-g" href="${esc(s.url)}" target="_blank" rel="noopener"><i class="ti ti-external-link"></i>Portal</a>
+        <a class="bn bn-t" href="${esc(s.tw)}" target="_blank" rel="noopener"><i class="ti ti-brand-twitter"></i>Twitter</a>
+      </div>`;
+    g.appendChild(d);
+  });
+}
+
+function buildTwSection(){
+  const sec=document.getElementById('tw-section');
+  TW_TIERS.forEach(tier=>{
+    const div=document.createElement('div');
+    div.innerHTML=`<div class="tier">${esc(tier.tier)}</div>`;
+    const row=document.createElement('div');
+    row.className='tw-row';
+    row.style.marginBottom='14px';
+    tier.handles.forEach(h=>{
+      const a=document.createElement('a');
+      a.className='tw-h';
+      a.href=h.url;a.target='_blank';a.rel='noopener';
+      a.textContent=h.label;
+      row.appendChild(a);
+    });
+    div.appendChild(row);
+    sec.appendChild(div);
+  });
+}
+
+function buildRSSList(){
+  const list=document.getElementById('rss-list');
+  const div=document.createElement('div');
+  div.className='card';
+  div.style.marginBottom='12px';
+  div.innerHTML=RSS_FEEDS.map(f=>`
+    <div class="rrow">
+      <div class="rname">
+        <div style="font-size:11px;font-weight:bold;color:var(--bright)">${esc(f.name)}</div>
+        <div style="font-size:9px;color:var(--dim);margin-top:2px">${esc(f.sub)}</div>
+      </div>
+      <div class="rss-btns">
+        <a class="bn bn-f" href="${FL(f.rss)}" target="_blank" rel="noopener"><i class="ti ti-rss"></i>Feedly +</a>
+        <a class="bn bn-a" href="${esc(f.rss)}" target="_blank" rel="noopener"><i class="ti ti-code"></i>RSS</a>
+        <a class="bn bn-g" href="${esc(f.web)}" target="_blank" rel="noopener"><i class="ti ti-external-link"></i>Web</a>
+      </div>
+    </div>`).join('');
+  list.appendChild(div);
+}
+
+function buildAlertsList(){
+  const div=document.getElementById('alerts-list');
+  div.innerHTML=`<h4 style="font-size:11px;font-weight:bold;color:var(--bright);margin-bottom:10px">22 Google Alert queries — copy each, paste at google.com/alerts</h4>`+
+  ALERT_QUERIES.map(a=>`
+    <div class="qrow">
+      <span style="font-size:8px;color:var(--dim);min-width:120px;letter-spacing:1px">${esc(a.cat)}</span>
+      <span class="qtxt">${esc(a.q)}</span>
+      <button class="bn-c" onclick="copyText('${esc(a.q)}',this)"><i class="ti ti-copy"></i> Copy</button>
+      <a class="bn bn-g" href="https://www.google.com/alerts" target="_blank" rel="noopener"><i class="ti ti-plus"></i>Alert</a>
+    </div>`).join('');
+}
+
+function buildTGGrid(){
+  const g=document.getElementById('tg-grid');
+  TG_CHANNELS.forEach(c=>{
+    const d=document.createElement('div');
+    d.className='tg-card';
+    d.innerHTML=`<div class="tg-name">${esc(c.name)}</div><div class="tg-desc">${esc(c.desc)}</div><div class="tg-how">How to find: ${esc(c.how)}</div>`;
+    g.appendChild(d);
+  });
+}
+
+function buildSearchGrid(){
+  const g=document.getElementById('search-grid');
+  // Group into pairs
+  for(let i=0;i<SEARCHES.length;i+=2){
+    const a=SEARCHES[i],b=SEARCHES[i+1];
+    const d=document.createElement('div');
+    d.className='state-card';
+    let html=`<a class="bn bn-${a.url.includes('twitter')?'t':'g'}" href="${esc(a.url)}" target="_blank" rel="noopener" style="width:100%;justify-content:flex-start;margin-bottom:5px"><i class="ti ti-external-link"></i>${esc(a.label)}</a>`;
+    if(b) html+=`<a class="bn bn-${b.url.includes('twitter')?'t':'g'}" href="${esc(b.url)}" target="_blank" rel="noopener" style="width:100%;justify-content:flex-start"><i class="ti ti-external-link"></i>${esc(b.label)}</a>`;
+    d.innerHTML=html;
+    g.appendChild(d);
+  }
+}
+
+function buildFTSelector(){
+  const sel=document.getElementById('ft-sel');
+  FT_DATA.forEach(f=>{const o=document.createElement('option');o.value=f.name;o.textContent=f.num+' — '+f.name;sel.appendChild(o)});
+}
+
+// ── STORAGE: works in Claude.ai (window.storage) AND standalone (localStorage) ─
+const store = {
+  async get(key) {
+    if (typeof window.storage !== 'undefined') {
+      try { const r = await window.storage.get(key); return r ? r.value : null; } catch {}
+    }
+    return localStorage.getItem(key);
+  },
+  async set(key, val) {
+    if (typeof window.storage !== 'undefined') {
+      try { await window.storage.set(key, val); return; } catch {}
+    }
+    localStorage.setItem(key, val);
+  }
+};
+const SRCS=['WhatsApp','Telegram','Twitter/X','News','Personal network'];
+let activeSrc='WhatsApp';
+let intelLog=[];
+
+function buildSrcRow(){
+  const row=document.getElementById('src-row');
+  SRCS.forEach(s=>{
+    const b=document.createElement('button');
+    b.className='sbtn'+(s===activeSrc?' on':'');
+    b.textContent=s;
+    b.onclick=()=>{activeSrc=s;document.querySelectorAll('.sbtn').forEach(x=>x.classList.remove('on'));b.classList.add('on')};
+    row.appendChild(b);
+  });
+}
+
+function loadLog(){
+  store.get('aml_osint_log_v3').then(s=>{
+    try{if(s)intelLog=JSON.parse(s)}catch{}
+    renderLog();
+  });
+}
+
+function saveLog(){
+  store.set('aml_osint_log_v3',JSON.stringify(intelLog));
+  renderLog();
+}
+
+function renderLog(){
+  document.getElementById('log-count').textContent=intelLog.length;
+  const list=document.getElementById('log-list');
+  if(intelLog.length===0){
+    list.innerHTML='<div style="font-size:12px;color:var(--dim);padding:8px 0">No intelligence logged yet. Add entries from WhatsApp, Telegram, news or personal contacts.</div>';
+    return;
+  }
+  list.innerHTML=intelLog.map(e=>`
+    <div class="lentry" data-id="${e.id}">
+      <div class="lmeta">
+        <div class="ltags">
+          <span class="tag">${esc(e.src)}</span>
+          <span class="tag">${esc(e.ft)}</span>
+          <span class="tag" style="font-size:8px">${esc(e.ts)}</span>
+        </div>
+        <button class="delbtn" onclick="deleteEntry(${e.id})" aria-label="Delete"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="ltxt">${esc(e.text)}</div>
+    </div>`).join('');
+}
+
+function addEntry(){
+  const txt=document.getElementById('log-in').value.trim();
+  const ft=document.getElementById('ft-sel').value;
+  if(!txt)return;
+  intelLog.unshift({id:Date.now(),ts:new Date().toLocaleString('en-IN'),src:activeSrc,ft,text:txt});
+  document.getElementById('log-in').value='';
+  saveLog();
+}
+
+function deleteEntry(id){
+  intelLog=intelLog.filter(e=>e.id!==id);
+  saveLog();
+}
+
+function copyText(txt,btn){
+  navigator.clipboard.writeText(txt).then(()=>{
+    const orig=btn.innerHTML;
+    btn.innerHTML='<i class="ti ti-check"></i> Copied';
+    btn.style.color='var(--safe)';
+    setTimeout(()=>{btn.innerHTML=orig;btn.style.color=''},1500);
+  }).catch(()=>{});
+}
+
+function exportBrief(){
+  const lines=[
+    `=== AML OSINT BRIEF — ${new Date().toLocaleString('en-IN')} ===`,
+    `Dashboard: AML OSINT Dashboard · Canara Bank TM Unit`,
+    ``,
+    `INTELLIGENCE LOG (${intelLog.length} entries):`,
+    ...intelLog.map(e=>`• [${e.ft}|${e.src}|${e.ts}] ${e.text}`),
+    ``,
+    `ACTIVE FRAUD TYPE MONITORING (12 channels):`,
+    ...FT_DATA.map(f=>`• ${f.num} ${f.name} — Monitoring: ${f.searches[0][0]}`),
+    ``,
+    `Dashboard generated: ${new Date().toLocaleString('en-IN')}`,
+  ];
+  navigator.clipboard.writeText(lines.join('\n')).then(()=>{
+    const btn=document.querySelector('[onclick="exportBrief()"]');
+    if(btn){const o=btn.innerHTML;btn.innerHTML='<i class="ti ti-check"></i> COPIED';setTimeout(()=>btn.innerHTML=o,2000)}
+  });
+}
+
+// ── CLOCK ─────────────────────────────────────────────────────────────────────
+function updateClock(){
+  const el=document.getElementById('clock');
+  if(el)el.textContent=new Date().toLocaleString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+setInterval(updateClock,30000);
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+updateClock();
+buildQNav();
+buildFTGrid();
+buildPortalGrid();
+buildStateGrid();
+buildTwSection();
+buildRSSList();
+buildAlertsList();
+buildTGGrid();
+buildSearchGrid();
+buildFTSelector();
+buildSrcRow();
+loadLog();
+</script>
+</body>
+</html>
